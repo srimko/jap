@@ -1,41 +1,77 @@
-# jap
+# 📘 Jap – Visualiser, lire et comprendre le japonais
 
-This template should help get you started developing with Vue 3 in Vite.
+**Jap** est une micro-application conçue pour aider les apprenants de japonais à **visualiser et décomposer des phrases japonaises**, à partir de n'importe quel support audio ou texte.
 
-## Recommended IDE Setup
+L'application fournit une lecture enrichie :
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Affichage de la phrase en **kanji**, **hiragana** et **romaji**
+- **Traduction française**
+- **Découpage mot par mot**
+- **Détails kanji par kanji**, avec lecture et prononciation syllabique
 
-## Customize configuration
+## 🧠 Objectif pédagogique
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Ce projet a pour but de :
 
-## Project Setup
+- Renforcer l'apprentissage du japonais en contexte
+- Faciliter la mémorisation des kanji et des lectures
+- Offrir un outil visuel minimaliste pour suivre des podcasts ou audios natifs
+
+Il est compatible avec tous les audios en japonais. Il utilise notamment les contenus du site [Nihongo con Teppei](https://nihongoconteppei.com/).
+
+## 🎥 Démo
+
+👉 [Voir la vidéo démo](./demo.mov)
+
+---
+
+## ⚙️ Stack technique
+
+- [Vue 3](https://vuejs.org/) + [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html)
+- [Tailwind](https://tailwindcss.com/) + [Nuxt UI](https://ui.nuxt.com/)
+- [Vite](https://vitejs.dev/) pour le build et le hot reload
+
+---
+
+## 🚀 Installation
+
+### Pré-requis
+
+- [Node.js](https://nodejs.org/) v16+
+- [npm](https://www.npmjs.com/) ou [pnpm](https://pnpm.io/)
+
+### Installation des dépendances
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Lancer en mode développement
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Compiler pour production
 
 ```sh
 npm run build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+### Lancer les tests unitaires (Vitest)
 
 ```sh
 npm run test:unit
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Lint (ESLint)
 
 ```sh
 npm run lint
 ```
+
+---
+
+## 🧪 IDE recommandé
+
+- [Visual Studio Code](https://code.visualstudio.com/)
