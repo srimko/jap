@@ -162,13 +162,35 @@
 
             <!-- Analyse japonaise -->
             <div v-if="transcription.japaneseAnalysis">
-              <p class="text-sm font-medium text-gray-600 mb-1">Analyse :</p>
-              <div class="text-sm bg-blue-50 p-2 rounded space-y-1">
-                <p><strong>Kanji:</strong> {{ transcription.japaneseAnalysis.kanji }}</p>
-                <p><strong>Hiragana:</strong> {{ transcription.japaneseAnalysis.hiragana }}</p>
-                <p><strong>Romaji:</strong> {{ transcription.japaneseAnalysis.romaji }}</p>
-                <p><strong>Traduction:</strong> {{ transcription.japaneseAnalysis.translation }}</p>
-                <p class="text-xs text-blue-600">{{ transcription.japaneseAnalysis.split?.length || 0 }} mots analysés</p>
+              <p class="text-sm font-medium text-gray-600 mb-2">Analyse japonaise :</p>
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100 space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div class="bg-white p-2 rounded shadow-sm">
+                    <span class="text-xs font-semibold text-red-700 uppercase tracking-wide">Kanji</span>
+                    <p class="text-sm font-medium text-gray-900 mt-1">{{ transcription.japaneseAnalysis.kanji }}</p>
+                  </div>
+                  <div class="bg-white p-2 rounded shadow-sm">
+                    <span class="text-xs font-semibold text-pink-700 uppercase tracking-wide">Hiragana</span>
+                    <p class="text-sm font-medium text-gray-900 mt-1">{{ transcription.japaneseAnalysis.hiragana }}</p>
+                  </div>
+                </div>
+                
+                <div class="bg-white p-2 rounded shadow-sm">
+                  <span class="text-xs font-semibold text-blue-700 uppercase tracking-wide">Romaji</span>
+                  <p class="text-sm font-medium text-gray-900 mt-1">{{ transcription.japaneseAnalysis.romaji }}</p>
+                </div>
+                
+                <div class="bg-white p-2 rounded shadow-sm border-l-4 border-green-500">
+                  <span class="text-xs font-semibold text-green-700 uppercase tracking-wide">Traduction française</span>
+                  <p class="text-sm font-medium text-gray-900 mt-1">{{ transcription.japaneseAnalysis.translation }}</p>
+                </div>
+                
+                <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                  <span class="text-xs text-blue-600 font-medium">
+                    📝 {{ transcription.japaneseAnalysis.split?.length || 0 }} mots analysés
+                  </span>
+                  <UBadge color="blue" size="xs" label="Analyse complète" />
+                </div>
               </div>
             </div>
 

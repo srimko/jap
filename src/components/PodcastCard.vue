@@ -72,19 +72,19 @@
         </span>
       </div>
 
-      <!-- Actions de transcription -->
+      <!-- Actions de téléchargement -->
       <div class="pt-3 border-t border-gray-100">
         <div class="flex gap-2">
           <UButton
-            @click="startTranscriptionFromUrl"
+            @click="downloadEpisodeFile"
             size="sm"
-            color="purple"
+            color="green"
             variant="solid"
-            :loading="isLoadingForTranscription"
+            :loading="isDownloadingFile"
             :disabled="!episode.mp3Url"
           >
-            <UIcon name="i-heroicons-microphone" class="mr-1" />
-            Transcrire cet épisode
+            <UIcon name="i-heroicons-arrow-down-tray" class="mr-1" />
+            Télécharger MP3
           </UButton>
           
           <UButton
@@ -105,7 +105,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 const props = defineProps({
   episode: {
@@ -116,12 +115,10 @@ const props = defineProps({
 
 const emit = defineEmits(['download', 'transcribe', 'add-to-queue'])
 
-const router = useRouter()
-
 // État local
 const showFullDescription = ref(false)
 const isDownloading = ref(false)
-const isLoadingForTranscription = ref(false)
+const isDownloadingFile = ref(false)
 const isInQueue = ref(false)
 
 // Actions
@@ -142,31 +139,36 @@ const openWebLink = () => {
   }
 }
 
-const startTranscriptionFromUrl = async () => {
-  isLoadingForTranscription.value = true
+const downloadEpisodeFile = async () => {
+  isDownloadingFile.value = true
   try {
-    // Télécharger le MP3 et le convertir en File pour la transcription
-    const response = await fetch(props.episode.mp3Url)
+    // Utiliser un proxy CORS pour télécharger le fichier MP3
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(props.episode.mp3Url)}`
+    
+    const response = await fetch(proxyUrl)
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`)
+    }
+    
     const blob = await response.blob()
     
-    // Créer un objet File à partir du blob
-    const file = new File([blob], `${props.episode.title}.mp3`, {
-      type: 'audio/mpeg'
-    })
+    // Créer un lien de téléchargement
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `Episode_${props.episode.episodeNumber}_${props.episode.title.replace(/[^a-z0-9]/gi, '_')}.mp3`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
     
-    // Émettre l'événement pour démarrer la transcription
-    emit('transcribe', {
-      episode: props.episode,
-      audioFile: file
-    })
-    
-    // Rediriger vers la page principale pour voir la transcription
-    router.push('/')
+    console.log('✅ Téléchargement réussi:', props.episode.title)
     
   } catch (error) {
-    console.error('Erreur lors du chargement du fichier audio:', error)
+    console.error('❌ Erreur lors du téléchargement:', error)
+    alert('Impossible de télécharger le fichier. Veuillez réessayer.')
   } finally {
-    isLoadingForTranscription.value = false
+    isDownloadingFile.value = false
   }
 }
 

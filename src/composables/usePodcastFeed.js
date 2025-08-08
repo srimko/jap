@@ -164,21 +164,30 @@ export function usePodcastFeed() {
   // Fonction pour télécharger un MP3
   const downloadEpisode = async (episode) => {
     try {
-      const response = await fetch(episode.mp3Url)
+      // Utiliser un proxy CORS pour éviter les problèmes CORS
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(episode.mp3Url)}`
+      
+      const response = await fetch(proxyUrl)
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`)
+      }
+      
       const blob = await response.blob()
       
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${episode.title.replace(/[^a-z0-9]/gi, '_')}.mp3`
+      link.download = `Episode_${episode.episodeNumber}_${episode.title.replace(/[^a-z0-9]/gi, '_')}.mp3`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       
+      console.log('✅ Téléchargement réussi:', episode.title)
+      
     } catch (err) {
-      console.error('Erreur lors du téléchargement:', err)
-      throw new Error('Impossible de télécharger le fichier')
+      console.error('❌ Erreur lors du téléchargement:', err)
+      throw new Error(`Impossible de télécharger le fichier: ${err.message}`)
     }
   }
 
