@@ -23,6 +23,12 @@
 - [x] **Store Pinia transcription.js** - Historique, cache, import/export (✅ 2025-01-08)
 - [x] **Migration composables vers stores** - Intégration complète (✅ 2025-01-08)
 
+### 🎯 Interface Historique
+- [x] **Page TranscriptionsView** - Interface complète d'historique (✅ 2025-01-08)
+- [x] **Recherche et filtres avancés** - Par contenu, statut, pagination (✅ 2025-01-08)
+- [x] **Statistiques tableau de bord** - Métriques temps réel (✅ 2025-01-08)
+- [x] **Actions de gestion** - Export, suppression, navigation (✅ 2025-01-08)
+
 ---
 
 ## 🔴 **Priorité Critique - Sécurité**
@@ -60,9 +66,9 @@
 - [ ] **Recherche et filtrage** des cartes
 
 ### 🔄 Historique et sessions
-- [ ] **Historique des transcriptions** avec horodatage
-- [ ] **Sessions d'étude sauvegardées**
-- [ ] **Export des données** utilisateur (RGPD)
+- [x] **Historique des transcriptions** avec horodatage (✅ 2025-01-08)
+- [x] **Sessions d'étude sauvegardées** (✅ 2025-01-08)
+- [x] **Export des données** utilisateur (RGPD) (✅ 2025-01-08)
 - [ ] **Nettoyage automatique** des anciennes données
 
 ---
@@ -240,6 +246,12 @@
   - Store `cards.js` : SM2 complet, statistiques, sessions d'étude, import/export
   - Store `transcription.js` : historique, cache, recherche, persistance
   - Migration composables vers architecture Pinia
+- ✅ **Interface historique transcriptions complète** :
+  - Page `TranscriptionsView.vue` avec dashboard statistiques
+  - Recherche avancée dans le contenu des transcriptions
+  - Filtres par statut avec pagination automatique
+  - Actions CRUD : voir, supprimer, exporter, vider tout
+  - Navigation mise à jour avec nouveau lien menu
 - 📋 Section "Completed Tasks" ajoutée
 
 ---
