@@ -35,6 +35,11 @@ const router = createRouter({
       name: 'podcasts',
       component: () => import('../views/PodcastsView.vue'),
     },
+    {
+      path: '/hiragana',
+      name: 'hiragana',
+      component: () => import('../views/HiraganaView.vue'),
+    },
   ],
 })
 

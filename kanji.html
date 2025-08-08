@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tableau Hiragana</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        padding: 2rem;
+        background: #f9f9f9;
+        font-family: sans-serif;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 80px);
+        grid-auto-rows: 80px;
+        gap: 12px;
+      }
+
+      .cell {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+      }
+
+      .cell:empty {
+        background-color: #ddd;
+      }
+
+      .char {
+        font-size: 1.6rem;
+        line-height: 1;
+      }
+
+      .romaji {
+        margin-top: 4px;
+        font-size: 0.85rem;
+        color: #666;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="grid" class="grid"></div>
+
+    <!-- structure JSON 2D pour gérer les « cases » vides -->
+    <script type="application/json" id="data">
+      [
+        [
+          { "char": "あ", "romaji": "a" },
+          { "char": "い", "romaji": "i" },
+          { "char": "う", "romaji": "u" },
+          { "char": "え", "romaji": "e" },
+          { "char": "お", "romaji": "o" }
+        ],
+        [
+          { "char": "か", "romaji": "ka" },
+          { "char": "き", "romaji": "ki" },
+          { "char": "く", "romaji": "ku" },
+          { "char": "け", "romaji": "ke" },
+          { "char": "こ", "romaji": "ko" }
+        ],
+        [
+          { "char": "さ", "romaji": "sa" },
+          { "char": "し", "romaji": "shi" },
+          { "char": "す", "romaji": "su" },
+          { "char": "せ", "romaji": "se" },
+          { "char": "そ", "romaji": "so" }
+        ],
+        [
+          { "char": "た", "romaji": "ta" },
+          { "char": "ち", "romaji": "chi" },
+          { "char": "つ", "romaji": "tsu" },
+          { "char": "て", "romaji": "te" },
+          { "char": "と", "romaji": "to" }
+        ],
+        [
+          { "char": "な", "romaji": "na" },
+          { "char": "に", "romaji": "ni" },
+          { "char": "ぬ", "romaji": "nu" },
+          { "char": "ね", "romaji": "ne" },
+          { "char": "の", "romaji": "no" }
+        ],
+        [
+          { "char": "は", "romaji": "ha" },
+          { "char": "ひ", "romaji": "hi" },
+          { "char": "ふ", "romaji": "fu" },
+          { "char": "へ", "romaji": "he" },
+          { "char": "ほ", "romaji": "ho" }
+        ],
+        [
+          { "char": "ま", "romaji": "ma" },
+          { "char": "み", "romaji": "mi" },
+          { "char": "む", "romaji": "mu" },
+          { "char": "め", "romaji": "me" },
+          { "char": "も", "romaji": "mo" }
+        ],
+        [
+          { "char": "や", "romaji": "ya" },
+          null,
+          { "char": "ゆ", "romaji": "yu" },
+          null,
+          { "char": "よ", "romaji": "yo" }
+        ],
+        [
+          { "char": "ら", "romaji": "ra" },
+          { "char": "り", "romaji": "ri" },
+          { "char": "る", "romaji": "ru" },
+          { "char": "れ", "romaji": "re" },
+          { "char": "ろ", "romaji": "ro" }
+        ],
+        [{ "char": "わ", "romaji": "wa" }, null, null, null, { "char": "を", "romaji": "wo" }],
+        [{ "char": "ん", "romaji": "n" }, null, null, null, null]
+      ]
+    </script>
+
+    <script>
+      ;(() => {
+        const table = JSON.parse(document.getElementById('data').textContent)
+        const grid = document.getElementById('grid')
+        table.forEach((row) => {
+          row.forEach((cellData) => {
+            const cell = document.createElement('div')
+            cell.className = 'cell'
+            if (cellData) {
+              cell.innerHTML = `
+              <div class="char">${cellData.char}</div>
+              <div class="romaji">${cellData.romaji}</div>
+            `
+            }
+            grid.appendChild(cell)
+          })
+        })
+      })()
+    </script>
+  </body>
+</html>

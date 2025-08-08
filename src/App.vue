@@ -15,6 +15,10 @@ const items = ref([
     to: '/podcasts',
   },
   {
+    label: 'Hiragana',
+    to: '/hiragana',
+  },
+  {
     label: 'SM2',
     to: '/sm2',
   },
