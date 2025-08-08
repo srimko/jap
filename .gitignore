@@ -30,6 +30,7 @@ coverage
 *.tsbuildinfo
 
 .env
+UI
 
 # Auto-generated type declarations
 auto-imports.d.ts

@@ -10,6 +10,10 @@ const items = ref([
     label: 'About',
     to: '/about',
   },
+  {
+    label: 'SM2',
+    to: '/sm2',
+  },
 ])
 </script>
 
