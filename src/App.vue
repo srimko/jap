@@ -7,12 +7,16 @@ const items = ref([
     to: '/',
   },
   {
-    label: 'About',
-    to: '/about',
+    label: 'Transcriptions',
+    to: '/transcriptions',
   },
   {
     label: 'SM2',
     to: '/sm2',
+  },
+  {
+    label: 'About',
+    to: '/about',
   },
 ])
 </script>

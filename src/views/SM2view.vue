@@ -39,12 +39,46 @@
           <p class="text-sm text-gray-600 mt-2">
             0 = Échec total • 5 = Parfait
           </p>
+          
+          <!-- Statistiques de session -->
+          <div v-if="statistics.sessionStats.isActive" class="mt-4 p-3 bg-blue-50 rounded">
+            <p class="text-sm text-blue-700">
+              🏆 Session: {{ statistics.sessionStats.cardsStudied }} cartes étudiées
+              • {{ Math.round((statistics.sessionStats.correctAnswers / Math.max(1, statistics.sessionStats.cardsStudied)) * 100) }}% de réussite
+            </p>
+          </div>
         </div>
       </div>
       
       <div v-else class="text-center">
         <UCard>
-          <p class="text-lg">🎉 Toutes les cartes sont à jour pour aujourd'hui !</p>
+          <template #header>
+            <h3 class="text-xl font-bold">🎉 Session terminée !</h3>
+          </template>
+          
+          <div class="space-y-4">
+            <p class="text-lg">Toutes les cartes sont à jour pour aujourd'hui !</p>
+            
+            <!-- Statistiques globales -->
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div class="bg-gray-50 p-3 rounded">
+                <p class="font-semibold text-gray-600">Total cartes</p>
+                <p class="text-2xl font-bold text-blue-600">{{ statistics.total }}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-3 rounded">
+                <p class="font-semibold text-gray-600">Étudiées aujourd'hui</p>
+                <p class="text-2xl font-bold text-green-600">{{ statistics.studiedToday }}</p>
+              </div>
+            </div>
+            
+            <UButton 
+              v-if="statistics.total > 0"
+              @click="startStudySession"
+              color="blue"
+              label="Nouvelle session"
+            />
+          </div>
         </UCard>
       </div>
     </div>
@@ -52,34 +86,24 @@
 </template>
 
 <script setup>
-import { useSM2 } from '@/composables/useSM2'
+import { useCardsStore } from '@/stores/cards'
+import { onMounted } from 'vue'
 
-const initialCards = [
-  {
-    id: '1',
-    front: 'こんにちは',
-    back: 'Bonjour',
-    easiness: 2.5,
-    interval: 0,
-    repetitions: 0,
-    dueDate: new Date(),
-  },
-  {
-    id: '2',
-    front: 'ありがとう',
-    back: 'Merci',
-    easiness: 2.5,
-    interval: 0,
-    repetitions: 0,
-    dueDate: new Date(),
-  }
-]
+const cardsStore = useCardsStore()
 
 const {
   dueCards,
   currentCard,
   showBack,
+  statistics,
   rate,
-  toggleShowBack
-} = useSM2(initialCards)
+  toggleShowBack,
+  startStudySession
+} = cardsStore
+
+onMounted(() => {
+  if (dueCards.length > 0 && !cardsStore.studySession.isActive) {
+    startStudySession()
+  }
+})
 </script>

@@ -25,6 +25,11 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/SM2view.vue'),
     },
+    {
+      path: '/transcriptions',
+      name: 'transcriptions',
+      component: () => import('../views/TranscriptionsView.vue'),
+    },
   ],
 })
 

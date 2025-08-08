@@ -17,6 +17,12 @@
 - [x] **Composable useAudioValidation** - Validation complète avec feedback utilisateur (✅ 2025-01-08)
 - [x] **Interface utilisateur améliorée** - Alerts d'erreur et informations fichier (✅ 2025-01-08)
 
+### 🟠 Persistance & État Global
+- [x] **Store Pinia app.js** - Gestion globale thème, préférences, erreurs (✅ 2025-01-08)
+- [x] **Store Pinia cards.js** - SM2 complet avec statistiques et historique (✅ 2025-01-08)
+- [x] **Store Pinia transcription.js** - Historique, cache, import/export (✅ 2025-01-08)
+- [x] **Migration composables vers stores** - Intégration complète (✅ 2025-01-08)
+
 ---
 
 ## 🔴 **Priorité Critique - Sécurité**
@@ -40,10 +46,10 @@
 ## 🟠 **Priorité Haute - Fonctionnalités Core**
 
 ### 💾 Persistance des données
-- [ ] **Store Pinia centralisé** pour l'état global
-- [ ] **LocalStorage/IndexedDB** pour cartes SM2
-- [ ] **Sauvegarde automatique** des sessions d'étude
-- [ ] **Import/Export JSON** des jeux de cartes
+- [x] **Store Pinia centralisé** pour l'état global (✅ 2025-01-08)
+- [x] **LocalStorage/IndexedDB** pour cartes SM2 (✅ 2025-01-08)
+- [x] **Sauvegarde automatique** des sessions d'étude (✅ 2025-01-08)
+- [x] **Import/Export JSON** des jeux de cartes (✅ 2025-01-08)
 - [ ] **Synchronisation cloud** (optionnelle)
 
 ### 🎯 Système SM2 avancé
@@ -229,6 +235,11 @@
   - Composants `FileValidationAlert.vue` et `AudioFileInfo.vue`
   - Intégration dans `HomeView.vue` avec feedback utilisateur
   - Support formats : MP3, WAV, M4A, OGG, WebM (max 50MB, 10min)
+- ✅ **Store Pinia centralisé complète** :
+  - Store `app.js` : thème, préférences, gestion erreurs globales
+  - Store `cards.js` : SM2 complet, statistiques, sessions d'étude, import/export
+  - Store `transcription.js` : historique, cache, recherche, persistance
+  - Migration composables vers architecture Pinia
 - 📋 Section "Completed Tasks" ajoutée
 
 ---
