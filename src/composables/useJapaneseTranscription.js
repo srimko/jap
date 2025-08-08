@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { functionSchema } from '@/llm/functionSchema'
 import { messages } from '@/llm/messages'
+import { useAudioValidation } from './useAudioValidation'
 
 export function useJapaneseTranscription() {
   const { VITE_OPENAI_API_KEY } = import.meta.env
@@ -10,6 +11,16 @@ export function useJapaneseTranscription() {
   const transcriptionLoading = ref(false)
   const textCompletion = ref(null)
   const textCompletionLoading = ref(false)
+  const fileInfo = ref(null)
+  
+  const {
+    validationError,
+    isValidating,
+    validateAudioFile,
+    clearValidationError,
+    getFileSizeFormatted,
+    getDurationFormatted
+  } = useAudioValidation()
 
   const getTranscription = async () => {
     const formData = new FormData()
@@ -55,7 +66,29 @@ export function useJapaneseTranscription() {
     textCompletionLoading.value = false
   }
 
+  const handleFileChange = async (selectedFile) => {
+    if (!selectedFile) {
+      file.value = null
+      fileInfo.value = null
+      clearValidationError()
+      return
+    }
+
+    const validation = await validateAudioFile(selectedFile)
+    if (validation.isValid) {
+      file.value = selectedFile
+      fileInfo.value = validation
+    } else {
+      file.value = null
+      fileInfo.value = null
+    }
+  }
+
   const processTranscription = async () => {
+    if (!file.value) {
+      throw new Error('Aucun fichier audio sélectionné')
+    }
+
     try {
       transcriptionLoading.value = true
       await getTranscription()
@@ -76,6 +109,13 @@ export function useJapaneseTranscription() {
     transcriptionLoading,
     textCompletion,
     textCompletionLoading,
-    processTranscription
+    fileInfo,
+    validationError,
+    isValidating,
+    processTranscription,
+    handleFileChange,
+    clearValidationError,
+    getFileSizeFormatted,
+    getDurationFormatted
   }
 }
