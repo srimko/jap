@@ -148,7 +148,7 @@ export function useJapaneseTranscription() {
         // Fichier déjà traité ! Utiliser le cache
         console.log('🚀 Transcription trouvée en cache, pas d’appel API nécessaire')
         
-        const cachedTranscription = transcriptionStore.createTranscriptionFromCache(
+        transcriptionStore.createTranscriptionFromCache(
           file.value, 
           fileInfo.value, 
           cacheResult.data, 

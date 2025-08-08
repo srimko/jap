@@ -11,6 +11,10 @@ const items = ref([
     to: '/transcriptions',
   },
   {
+    label: 'Podcasts',
+    to: '/podcasts',
+  },
+  {
     label: 'SM2',
     to: '/sm2',
   },
