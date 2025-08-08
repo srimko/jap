@@ -37,6 +37,35 @@ npm run format
 ## URL de développement
 http://localhost:5173/
 
+## Roadmap Management
+**🤖 AUTOMATIQUE - Claude doit TOUJOURS :**
+
+### Après chaque feature/fix implémenté(e) :
+1. **Identifier** la tâche correspondante dans ROADMAP.md
+2. **Mettre à jour** automatiquement le statut :
+   - `- [ ]` → `- [x]` (tâche complétée)
+   - Ajouter date : `- [x] **Task** (✅ 2025-01-08)`
+3. **Déplacer** vers section "Completed" si milestone atteint
+4. **Commenter** brièvement la completion dans le commit
+
+### Template de commit avec roadmap :
+```
+feat: Add dark mode toggle
+
+🗺️ ROADMAP: Mode sombre/clair ✅
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+### Règles de mapping :
+- Security fixes → 🔴 Priorité Critique  
+- Core features → 🟠 Priorité Haute
+- UI/UX → 🟡 Priorité Moyenne
+- Performance/Tests → 🟢 Priorité Basse
+
+**IMPORTANT : Ne jamais implémenter une feature sans mettre à jour ROADMAP.md**
+
 ## Notes
 - Compatible avec les podcasts japonais (ex: Nihongo con Teppei)
 - Objectif pédagogique : apprentissage contextuel du japonais
