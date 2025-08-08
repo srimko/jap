@@ -29,6 +29,12 @@
 - [x] **Statistiques tableau de bord** - Métriques temps réel (✅ 2025-01-08)
 - [x] **Actions de gestion** - Export, suppression, navigation (✅ 2025-01-08)
 
+### ⚡ Cache et Performance
+- [x] **Hash de fichiers audio** - SHA-256 hybride pour déduplication (✅ 2025-01-08)
+- [x] **Cache intelligent localStorage** - Évite les appels API doublons (✅ 2025-01-08)
+- [x] **Indicateurs temps réel** - Status cache/processing/saving (✅ 2025-01-08)
+- [x] **Statistiques cache** - Hits, taille, gestion dans interface (✅ 2025-01-08)
+
 ---
 
 ## 🔴 **Priorité Critique - Sécurité**
@@ -43,6 +49,7 @@
 
 ### 🛡️ Validation des données
 - [x] **Validation fichiers audio** (type, taille, durée max) (✅ 2025-01-08)
+- [x] **Déduplication fichiers audio** - Hash SHA-256 + cache intelligent (✅ 2025-01-08)
 - [ ] **Sanitisation des réponses API** OpenAI
 - [ ] **Gestion sécurisée des erreurs** (logs serveur, messages utilisateur)
 - [ ] **Protection CSRF** si formulaires sensibles
@@ -252,6 +259,12 @@
   - Filtres par statut avec pagination automatique
   - Actions CRUD : voir, supprimer, exporter, vider tout
   - Navigation mise à jour avec nouveau lien menu
+- ✅ **Système de cache et déduplication** :
+  - Utilitaire `fileHash.js` avec hash SHA-256 hybride performant
+  - Store transcription étendu avec cache Map() et persistance
+  - Composable mis à jour : détection automatique doublons
+  - Composant `CacheIndicator.vue` avec feedback temps réel
+  - Interface enrichie : statistiques cache + badge "Cache" + actions
 - 📋 Section "Completed Tasks" ajoutée
 
 ---

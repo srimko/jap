@@ -6,6 +6,15 @@
         
         <div class="flex gap-2">
           <UButton 
+            @click="clearCache"
+            color="orange"
+            variant="outline"
+            size="sm"
+            label="Vider le cache"
+            :disabled="cacheStats.totalCached === 0"
+          />
+          
+          <UButton 
             @click="clearAllTranscriptions"
             color="red"
             variant="outline"
@@ -26,7 +35,7 @@
       </div>
 
       <!-- Statistiques globales -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <UCard>
           <div class="text-center">
             <p class="text-2xl font-bold text-blue-600">{{ statistics.total }}</p>
@@ -52,6 +61,15 @@
           <div class="text-center">
             <p class="text-2xl font-bold text-orange-600">{{ statistics.successRate }}%</p>
             <p class="text-sm text-gray-600">Taux de succès</p>
+          </div>
+        </UCard>
+        
+        <!-- Nouvelle carte pour le cache -->
+        <UCard>
+          <div class="text-center">
+            <p class="text-2xl font-bold text-cyan-600">{{ cacheStats.totalCached }}</p>
+            <p class="text-sm text-gray-600">En cache</p>
+            <p class="text-xs text-gray-400">{{ cacheStats.cacheHits }} hits</p>
           </div>
         </UCard>
       </div>
@@ -104,6 +122,12 @@
                   <UBadge 
                     :color="getStatusColor(transcription.status)"
                     :label="getStatusLabel(transcription.status)"
+                    size="xs"
+                  />
+                  <UBadge 
+                    v-if="transcription.fromCache"
+                    color="cyan"
+                    label="Cache"
                     size="xs"
                   />
                 </div>
@@ -196,12 +220,16 @@ const {
   transcriptions,
   statistics,
   searchTranscriptions,
-  filterByStatus,
   deleteTranscription: storeDeleteTranscription,
   clearAllTranscriptions: storeClearAll,
   exportTranscriptions,
-  setCurrentTranscription
+  setCurrentTranscription,
+  getCacheStats,
+  clearCache: storeClearCache
 } = transcriptionStore
+
+// Statistiques du cache
+const cacheStats = computed(() => getCacheStats())
 
 // Transcriptions filtrées
 const filteredTranscriptions = computed(() => {
@@ -251,6 +279,12 @@ const deleteTranscription = (id) => {
 const clearAllTranscriptions = () => {
   if (confirm('Êtes-vous sûr de vouloir supprimer toutes les transcriptions ?')) {
     storeClearAll()
+  }
+}
+
+const clearCache = () => {
+  if (confirm('Êtes-vous sûr de vouloir vider le cache des fichiers ? Cela forcera le retraitement de tous les fichiers déjà vus.')) {
+    storeClearCache()
   }
 }
 

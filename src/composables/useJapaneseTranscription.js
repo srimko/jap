@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { functionSchema } from '@/llm/functionSchema'
 import { messages } from '@/llm/messages'
 import { useAudioValidation } from './useAudioValidation'
@@ -21,11 +21,43 @@ export function useJapaneseTranscription() {
     getDurationFormatted
   } = useAudioValidation()
   
-  // Computed depuis les stores
+  // État réactif synchronisé avec le store
   const textTranscription = ref('')
   const textCompletion = ref(null)
   const transcriptionLoading = ref(false)
   const textCompletionLoading = ref(false)
+  
+  // Synchronisation automatique avec le store currentTranscription
+  watch(
+    () => transcriptionStore.currentTranscription,
+    (newTranscription, oldTranscription) => {
+      console.log('🔄 Watcher déclenché - currentTranscription changée:', {
+        newId: newTranscription?.id,
+        oldId: oldTranscription?.id,
+        hasNew: !!newTranscription,
+        hasRawText: !!newTranscription?.rawText,
+        hasJapaneseAnalysis: !!newTranscription?.japaneseAnalysis,
+        fromCache: newTranscription?.fromCache
+      })
+      
+      if (newTranscription) {
+        // Forcer la mise à jour des refs
+        textTranscription.value = newTranscription.rawText || ''
+        textCompletion.value = newTranscription.japaneseAnalysis || null
+        
+        console.log('🔄 Refs mis à jour:', {
+          textTranscription: textTranscription.value.length > 0,
+          textCompletion: !!textCompletion.value,
+          textCompletionKeys: textCompletion.value ? Object.keys(textCompletion.value) : []
+        })
+      } else {
+        // Vider si pas de transcription courante
+        textTranscription.value = ''
+        textCompletion.value = null
+      }
+    },
+    { immediate: true, deep: true }
+  )
 
   const getTranscription = async (transcriptionId) => {
     const formData = new FormData()
@@ -109,8 +141,35 @@ export function useJapaneseTranscription() {
     let transcriptionId = null
     
     try {
+      // Vérifier d'abord le cache
+      const cacheResult = await transcriptionStore.findCachedTranscription(file.value)
+      
+      if (cacheResult.found) {
+        // Fichier déjà traité ! Utiliser le cache
+        console.log('🚀 Transcription trouvée en cache, pas d’appel API nécessaire')
+        
+        const cachedTranscription = transcriptionStore.createTranscriptionFromCache(
+          file.value, 
+          fileInfo.value, 
+          cacheResult.data, 
+          cacheResult.fileMetadata
+        )
+        
+        // Simuler un court délai pour l'UX (optionnel)
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        // Le watcher se chargera de mettre à jour textTranscription et textCompletion
+        // automatiquement quand currentTranscription change
+        console.log('✅ Transcription depuis cache créée, le watcher va synchroniser l\'interface')
+        
+        return // Terminé !
+      }
+      
+      // Pas en cache, traitement normal
+      console.log('🔄 Nouveau fichier, traitement avec API...')
+      
       // Créer une nouvelle transcription dans le store
-      const transcription = transcriptionStore.createTranscription(file.value, fileInfo.value)
+      const transcription = await transcriptionStore.createTranscription(file.value, fileInfo.value)
       transcriptionId = transcription.id
       
       // Phase 1: Transcription

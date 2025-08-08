@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAppStore } from './app'
+import { generateFileMetadata } from '@/utils/fileHash'
 
 export const useTranscriptionStore = defineStore('transcription', () => {
   const appStore = useAppStore()
@@ -14,6 +15,10 @@ export const useTranscriptionStore = defineStore('transcription', () => {
   // Historique et cache
   const transcriptionHistory = ref([])
   const maxHistoryItems = ref(50)
+  
+  // Cache par hash de fichier
+  const fileHashCache = ref(new Map()) // hash -> transcription data
+  const hashToTranscriptionId = ref(new Map()) // hash -> transcription id
 
   // Computed
   const hasCurrentTranscription = computed(() => 
@@ -46,14 +51,19 @@ export const useTranscriptionStore = defineStore('transcription', () => {
   }))
 
   // Actions principales
-  const createTranscription = (audioFile, fileInfo) => {
+  const createTranscription = async (audioFile, fileInfo) => {
+    // Générer les métadonnées du fichier avec hash
+    const fileMetadata = await generateFileMetadata(audioFile)
+    
     const transcription = {
       id: Date.now().toString(),
+      fileHash: fileMetadata.hash,
       audioFile: {
         name: audioFile.name,
         size: audioFile.size,
         type: audioFile.type,
-        duration: fileInfo?.duration || 0
+        duration: fileInfo?.duration || 0,
+        hash: fileMetadata.hash
       },
       rawText: '',
       japaneseAnalysis: null,
@@ -62,16 +72,23 @@ export const useTranscriptionStore = defineStore('transcription', () => {
       createdAt: new Date(),
       completedAt: null,
       processingTime: 0,
+      fromCache: false,
       metadata: {
         modelUsed: 'whisper-1',
         temperature: 0.2,
-        language: 'ja'
+        language: 'ja',
+        fileMetadata
       }
     }
 
     transcriptions.value.push(transcription)
     currentTranscription.value = transcription
+    
+    // Mapper hash -> transcription ID
+    hashToTranscriptionId.value.set(fileMetadata.hash, transcription.id)
+    
     saveTranscriptions()
+    saveHashCache()
     
     return transcription
   }
@@ -149,6 +166,19 @@ export const useTranscriptionStore = defineStore('transcription', () => {
     isProcessingCompletion.value = false
     appStore.setLoading(false)
     updateTranscriptionStatus(transcriptionId, 'completed', { japaneseAnalysis })
+    
+    // Mettre à jour le cache par hash
+    const transcription = transcriptions.value.find(t => t.id === transcriptionId)
+    if (transcription && transcription.fileHash) {
+      fileHashCache.value.set(transcription.fileHash, {
+        rawText: transcription.rawText,
+        japaneseAnalysis: japaneseAnalysis,
+        processingTime: transcription.processingTime,
+        completedAt: transcription.completedAt,
+        metadata: transcription.metadata
+      })
+      saveHashCache()
+    }
     
     // Ajouter à l'historique
     addToHistory(currentTranscription.value)
@@ -249,11 +279,106 @@ export const useTranscriptionStore = defineStore('transcription', () => {
       .map(([format, count]) => ({ format, count }))
   }
 
+  // Cache et déduplication
+  const findCachedTranscription = async (audioFile) => {
+    try {
+      const fileMetadata = await generateFileMetadata(audioFile)
+      const cachedData = fileHashCache.value.get(fileMetadata.hash)
+      
+      if (cachedData) {
+        return {
+          found: true,
+          hash: fileMetadata.hash,
+          data: cachedData,
+          fileMetadata
+        }
+      }
+      
+      return {
+        found: false,
+        hash: fileMetadata.hash,
+        fileMetadata
+      }
+    } catch (error) {
+      console.error('Erreur lors de la recherche en cache:', error)
+      return { found: false, error: error.message }
+    }
+  }
+  
+  const createTranscriptionFromCache = (audioFile, fileInfo, cachedData, fileMetadata) => {
+    console.log('🔧 createTranscriptionFromCache - cachedData:', cachedData)
+    
+    const transcription = {
+      id: Date.now().toString(),
+      fileHash: fileMetadata.hash,
+      audioFile: {
+        name: audioFile.name,
+        size: audioFile.size,
+        type: audioFile.type,
+        duration: fileInfo?.duration || 0,
+        hash: fileMetadata.hash
+      },
+      rawText: cachedData.rawText || '',
+      japaneseAnalysis: cachedData.japaneseAnalysis || null,
+      status: 'completed',
+      error: null,
+      createdAt: new Date(),
+      completedAt: cachedData.completedAt || new Date(),
+      processingTime: cachedData.processingTime || 0,
+      fromCache: true, // Indiquer que c'est du cache
+      metadata: {
+        ...cachedData.metadata,
+        fileMetadata,
+        cachedAt: new Date()
+      }
+    }
+
+    console.log('🔧 Transcription créée depuis cache:', {
+      id: transcription.id,
+      hasRawText: !!transcription.rawText,
+      hasJapaneseAnalysis: !!transcription.japaneseAnalysis,
+      japaneseAnalysisKeys: transcription.japaneseAnalysis ? Object.keys(transcription.japaneseAnalysis) : []
+    })
+
+    transcriptions.value.push(transcription)
+    
+    // IMPORTANT: Assigner explicitement currentTranscription
+    currentTranscription.value = transcription
+    
+    console.log('🔧 currentTranscription définie:', !!currentTranscription.value)
+    
+    // Mapper hash -> transcription ID
+    hashToTranscriptionId.value.set(fileMetadata.hash, transcription.id)
+    
+    saveTranscriptions()
+    
+    // Ajouter à l'historique
+    addToHistory(transcription)
+    
+    return transcription
+  }
+  
+  const getCacheStats = () => {
+    return {
+      totalCached: fileHashCache.value.size,
+      cacheHits: transcriptions.value.filter(t => t.fromCache).length,
+      cacheSize: JSON.stringify(Object.fromEntries(fileHashCache.value)).length
+    }
+  }
+  
+  const clearCache = () => {
+    fileHashCache.value.clear()
+    hashToTranscriptionId.value.clear()
+    saveHashCache()
+  }
+
   // Import/Export
   const exportTranscriptions = () => {
     return JSON.stringify({
       transcriptions: transcriptions.value,
       history: transcriptionHistory.value,
+      cache: Object.fromEntries(fileHashCache.value),
+      cacheMapping: Object.fromEntries(hashToTranscriptionId.value),
       exportedAt: new Date()
     }, null, 2)
   }
@@ -265,6 +390,8 @@ export const useTranscriptionStore = defineStore('transcription', () => {
       if (replaceExisting) {
         transcriptions.value = data.transcriptions || []
         transcriptionHistory.value = data.history || []
+        fileHashCache.value = new Map(Object.entries(data.cache || {}))
+        hashToTranscriptionId.value = new Map(Object.entries(data.cacheMapping || {}))
       } else {
         // Éviter les doublons
         const existingIds = new Set(transcriptions.value.map(t => t.id))
@@ -274,10 +401,28 @@ export const useTranscriptionStore = defineStore('transcription', () => {
         const existingHistoryIds = new Set(transcriptionHistory.value.map(h => h.id))
         const newHistory = (data.history || []).filter(h => !existingHistoryIds.has(h.id))
         transcriptionHistory.value.push(...newHistory)
+        
+        // Importer le cache
+        if (data.cache) {
+          Object.entries(data.cache).forEach(([hash, cacheData]) => {
+            if (!fileHashCache.value.has(hash)) {
+              fileHashCache.value.set(hash, cacheData)
+            }
+          })
+        }
+        
+        if (data.cacheMapping) {
+          Object.entries(data.cacheMapping).forEach(([hash, transcriptionId]) => {
+            if (!hashToTranscriptionId.value.has(hash)) {
+              hashToTranscriptionId.value.set(hash, transcriptionId)
+            }
+          })
+        }
       }
       
       saveTranscriptions()
       saveHistory()
+      saveHashCache()
       
       return { success: true, imported: data.transcriptions?.length || 0 }
     } catch (error) {
@@ -295,6 +440,13 @@ export const useTranscriptionStore = defineStore('transcription', () => {
   const saveHistory = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('jap-transcription-history', JSON.stringify(transcriptionHistory.value))
+    }
+  }
+  
+  const saveHashCache = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('jap-file-hash-cache', JSON.stringify(Object.fromEntries(fileHashCache.value)))
+      localStorage.setItem('jap-hash-to-transcription', JSON.stringify(Object.fromEntries(hashToTranscriptionId.value)))
     }
   }
 
@@ -326,6 +478,27 @@ export const useTranscriptionStore = defineStore('transcription', () => {
           console.warn('Failed to load transcription history:', error)
         }
       }
+      
+      // Charger le cache des hash
+      const savedCache = localStorage.getItem('jap-file-hash-cache')
+      if (savedCache) {
+        try {
+          const parsed = JSON.parse(savedCache)
+          fileHashCache.value = new Map(Object.entries(parsed))
+        } catch (error) {
+          console.warn('Failed to load file hash cache:', error)
+        }
+      }
+      
+      const savedMapping = localStorage.getItem('jap-hash-to-transcription')
+      if (savedMapping) {
+        try {
+          const parsed = JSON.parse(savedMapping)
+          hashToTranscriptionId.value = new Map(Object.entries(parsed))
+        } catch (error) {
+          console.warn('Failed to load hash to transcription mapping:', error)
+        }
+      }
     }
   }
 
@@ -340,6 +513,7 @@ export const useTranscriptionStore = defineStore('transcription', () => {
     isProcessingCompletion,
     transcriptionHistory,
     maxHistoryItems,
+    fileHashCache,
     
     // Computed
     hasCurrentTranscription,
@@ -362,6 +536,12 @@ export const useTranscriptionStore = defineStore('transcription', () => {
     finishProcessingCompletion,
     handleError,
     
+    // Cache et déduplication
+    findCachedTranscription,
+    createTranscriptionFromCache,
+    getCacheStats,
+    clearCache,
+    
     // Historique
     addToHistory,
     getFromHistory,
@@ -379,6 +559,7 @@ export const useTranscriptionStore = defineStore('transcription', () => {
     // Persistance
     saveTranscriptions,
     saveHistory,
+    saveHashCache,
     loadTranscriptions
   }
 })

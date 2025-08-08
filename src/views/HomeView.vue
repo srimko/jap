@@ -8,6 +8,14 @@
         :error="validationError" 
         @close="clearValidationError" 
       />
+      
+      <!-- Cache Indicator -->
+      <CacheIndicator 
+        :status="cacheStatus"
+        :file-name="file?.name || ''"
+        :cache-stats="transcriptionStore.getCacheStats()"
+        :processing-time="processingTime"
+      />
 
       <div class="flex justify-between mb-4">
         <UInput 
@@ -44,7 +52,12 @@
 
       <LoadingSkeleton v-else-if="transcriptionLoading" />
 
-      <JapaneseTextDisplay v-if="textCompletion" :text-completion="textCompletion" />
+      <!-- Afficher JapaneseTextDisplay si on a les données (cache ou API) -->
+      <JapaneseTextDisplay 
+        v-if="textCompletion && (textCompletion.kanji || textCompletion.hiragana)" 
+        :text-completion="textCompletion" 
+      />
+      
       
       <CompletionLoadingSkeleton v-else-if="textCompletionLoading" />
     </div>
@@ -52,12 +65,17 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useJapaneseTranscription } from '@/composables/useJapaneseTranscription'
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
 import JapaneseTextDisplay from '@/components/JapaneseTextDisplay.vue'
 import CompletionLoadingSkeleton from '@/components/CompletionLoadingSkeleton.vue'
 import FileValidationAlert from '@/components/FileValidationAlert.vue'
 import AudioFileInfo from '@/components/AudioFileInfo.vue'
+import CacheIndicator from '@/components/CacheIndicator.vue'
+import { useTranscriptionStore } from '@/stores/transcription'
+
+const transcriptionStore = useTranscriptionStore()
 
 const {
   file,
@@ -75,11 +93,48 @@ const {
   getDurationFormatted
 } = useJapaneseTranscription()
 
+// État pour l'indicateur de cache
+const cacheStatus = ref('none')
+const processingTime = ref(0)
+
+
 const startTranscription = async () => {
   try {
+    // Indiquer le début du traitement
+    cacheStatus.value = 'processing'
+    processingTime.value = 0
+    
+    const startTime = Date.now()
+    
+    // Pré-vérifier le cache pour l'indicateur UX
+    const cacheResult = await transcriptionStore.findCachedTranscription(file.value)
+    
+    if (cacheResult.found) {
+      // Trouvé en cache - indiquer à l'utilisateur
+      cacheStatus.value = 'found'
+    }
+    
+    // TOUJOURS appeler processTranscription - il gère le cache en interne
     await processTranscription()
+    
+    const endTime = Date.now()
+    processingTime.value = endTime - startTime
+    
+    if (cacheResult.found) {
+      // C'était du cache - masquer après 3 secondes
+      setTimeout(() => {
+        cacheStatus.value = 'none'
+      }, 3000)
+    } else {
+      // C'était un nouveau traitement - indiquer la sauvegarde
+      cacheStatus.value = 'saving'
+      setTimeout(() => {
+        cacheStatus.value = 'none'
+      }, 4000)
+    }
   } catch (error) {
     console.error('Erreur lors de la transcription:', error)
+    cacheStatus.value = 'none'
     // L'erreur sera gérée par le composable
   }
 }
