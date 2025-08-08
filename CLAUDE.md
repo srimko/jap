@@ -37,34 +37,36 @@ npm run format
 ## URL de développement
 http://localhost:5173/
 
-## Roadmap Management
+## Documentation Management
 **🤖 AUTOMATIQUE - Claude doit TOUJOURS :**
 
 ### Après chaque feature/fix implémenté(e) :
-1. **Identifier** la tâche correspondante dans ROADMAP.md
-2. **Mettre à jour** automatiquement le statut :
-   - `- [ ]` → `- [x]` (tâche complétée)
-   - Ajouter date : `- [x] **Task** (✅ 2025-01-08)`
-3. **Déplacer** vers section "Completed" si milestone atteint
-4. **Commenter** brièvement la completion dans le commit
+1. **Mettre à jour CHANGELOG.md** avec les changements :
+   - Section `[Non publié]` avec date du jour
+   - Catégories : ✨ Ajouté, 🎨 Amélioré, 🔧 Corrigé, 🗑️ Supprimé
+2. **Mettre à jour ROADMAP.md** si nouvelles tâches identifiées :
+   - Ajouter nouvelles fonctionnalités planifiées
+   - Déplacer tâches complétées vers section "Completed"
+3. **Mettre à jour docs/pages/** si changements dans les pages
+4. **Commenter** brièvement dans le commit
 
-### Template de commit avec roadmap :
+### Template de commit avec documentation :
 ```
 feat: Add dark mode toggle
 
-🗺️ ROADMAP: Mode sombre/clair ✅
+Updates CHANGELOG.md and ROADMAP.md accordingly.
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-### Règles de mapping :
-- Security fixes → 🔴 Priorité Critique  
-- Core features → 🟠 Priorité Haute
-- UI/UX → 🟡 Priorité Moyenne
-- Performance/Tests → 🟢 Priorité Basse
+### Fichiers de documentation :
+- **CHANGELOG.md** : Historique des changements implémentés
+- **ROADMAP.md** : Planification des futures fonctionnalités
+- **docs/pages/*** : Documentation détaillée par page
+- **docs/README.md** : Index de la documentation
 
-**IMPORTANT : Ne jamais implémenter une feature sans mettre à jour ROADMAP.md**
+**IMPORTANT : Toujours maintenir la documentation à jour avec le code**
 
 ## Notes
 - Compatible avec les podcasts japonais (ex: Nihongo con Teppei)

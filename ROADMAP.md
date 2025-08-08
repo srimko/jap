@@ -97,6 +97,19 @@
 - [ ] **Mode portrait/paysage** adaptatif
 - [ ] **Clavier virtuel** optimisé
 
+### 🎯 Améliorations JapaneseTextDisplay - Quick Wins
+- [ ] **Audio de base** :
+  - [ ] Bouton lecture TTS simple par phrase
+  - [ ] Indicateurs audio disponible/indisponible
+- [ ] **Interactivité immédiate** :
+  - [ ] Boutons "Ajouter au deck SM2" par mot clé
+  - [ ] Mode toggle "Masquer kanji" pour test de lecture
+  - [ ] Copier dans presse-papiers par élément
+- [ ] **Visuel rapide** :
+  - [ ] Hover effects sur les tokens interactifs
+  - [ ] Couleurs grammaticales de base (verbe=bleu, nom=vert, etc.)
+  - [ ] Indicateur JLPT level si disponible dans les données GPT-4
+
 ### ♿ Accessibilité
 - [ ] **Attributs ARIA** complets
 - [ ] **Navigation clavier** complète
@@ -142,6 +155,39 @@
 - [ ] **Sous-titres interactifs** avec timing
 - [ ] **Reconnaissance vocale** pour pronunciation
 - [ ] **Waveform visualization** du fichier audio
+
+### 🇯🇵 Améliorations JapaneseTextDisplay - Composant d'affichage
+- [ ] **Fonctionnalités audio intégrées** :
+  - [ ] Boutons de lecture TTS pour entendre la prononciation
+  - [ ] Vitesse de lecture ajustable (0.5x à 2x)
+  - [ ] Répétition en boucle par phrase/mot
+  - [ ] Surlignage synchronisé pendant la lecture
+- [ ] **Interactivité d'apprentissage** :
+  - [ ] Mode quiz/test de compréhension
+  - [ ] Masquage sélectif (cacher kanji pour tester lecture)
+  - [ ] Système de favoris pour marquer mots difficiles
+  - [ ] Mode "deviner la traduction" (cacher français)
+- [ ] **Enrichissement du contenu** :
+  - [ ] Informations grammaticales (particules, conjugaisons)
+  - [ ] Exemples d'usage alternatifs par mot
+  - [ ] Niveau de difficulté des kanji (JLPT N1-N5)
+  - [ ] Fréquence d'usage des mots dans la langue
+- [ ] **Améliorations visuelles** :
+  - [ ] Couleurs distinctives par type grammatical (verbe, nom, particule)
+  - [ ] Animations subtiles lors des interactions hover/click
+  - [ ] Mode clair/sombre pour le composant
+  - [ ] Taille de police ajustable par l'utilisateur
+  - [ ] Polices japonaises optimisées (Noto Sans JP)
+- [ ] **Intégration SM2 directe** :
+  - [ ] Bouton "Ajouter au deck" pour chaque mot/phrase
+  - [ ] Export automatique vers système de répétition espacée
+  - [ ] Marquage visuel des mots déjà étudiés/connus
+  - [ ] Indicateurs de difficulté personnalisés
+- [ ] **Analyse linguistique avancée** :
+  - [ ] Détection automatique du niveau grammatical
+  - [ ] Liens vers conjugaisons complètes des verbes
+  - [ ] Associations de mots (synonymes, antonymes)
+  - [ ] Contexte d'usage (formel, informel, écrit, oral)
 
 ### 🧠 Intelligence artificielle
 - [ ] **Suggestions automatiques** de cartes
@@ -238,35 +284,5 @@
 
 ---
 
-## 🔄 **Changelog Auto-Update**
-
-### 2025-01-08
-- ✅ Refactoring complet avec composables et composants
-- ✅ Configuration roadmap auto-update dans CLAUDE.md
-- ✅ **Validation fichiers audio complète** :
-  - Composable `useAudioValidation.js` avec validation type/taille/durée
-  - Composants `FileValidationAlert.vue` et `AudioFileInfo.vue`
-  - Intégration dans `HomeView.vue` avec feedback utilisateur
-  - Support formats : MP3, WAV, M4A, OGG, WebM (max 50MB, 10min)
-- ✅ **Store Pinia centralisé complète** :
-  - Store `app.js` : thème, préférences, gestion erreurs globales
-  - Store `cards.js` : SM2 complet, statistiques, sessions d'étude, import/export
-  - Store `transcription.js` : historique, cache, recherche, persistance
-  - Migration composables vers architecture Pinia
-- ✅ **Interface historique transcriptions complète** :
-  - Page `TranscriptionsView.vue` avec dashboard statistiques
-  - Recherche avancée dans le contenu des transcriptions
-  - Filtres par statut avec pagination automatique
-  - Actions CRUD : voir, supprimer, exporter, vider tout
-  - Navigation mise à jour avec nouveau lien menu
-- ✅ **Système de cache et déduplication** :
-  - Utilitaire `fileHash.js` avec hash SHA-256 hybride performant
-  - Store transcription étendu avec cache Map() et persistance
-  - Composable mis à jour : détection automatique doublons
-  - Composant `CacheIndicator.vue` avec feedback temps réel
-  - Interface enrichie : statistiques cache + badge "Cache" + actions
-- 📋 Section "Completed Tasks" ajoutée
-
----
-
-*🤖 Ce roadmap est automatiquement mis à jour par Claude à chaque feature implémentée.*
+*🤖 Cette roadmap est automatiquement mise à jour par Claude à chaque planification de nouvelles fonctionnalités.*
+*📝 Pour l'historique des changements implémentés, voir [CHANGELOG.md](CHANGELOG.md)*
