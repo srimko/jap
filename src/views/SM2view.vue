@@ -1,69 +1,85 @@
 <template>
-  <div class="p-4">
-    <div v-if="dueCards.length">
-      <div class="mb-4">
-        <h2 class="text-xl font-bold">{{ currentCard.front }}</h2>
-        <button @click="showBack = !showBack" class="mt-2 underline">
-          {{ showBack ? 'Cacher' : 'Voir la réponse' }}
-        </button>
-        <p v-if="showBack" class="mt-2">{{ currentCard.back }}</p>
-      </div>
-      <div>
-        <span class="block mb-1">Évaluez votre réponse :</span>
-        <div class="space-x-2">
-          <button v-for="n in 6" :key="n - 1" @click="rate(n - 1)" class="px-2 py-1 border rounded">
-            {{ n - 1 }}
-          </button>
+  <UContainer>
+    <div class="max-w-2xl mx-auto p-4">
+      <h2 class="text-2xl font-bold mb-6">Système de répétition espacée SM2</h2>
+      
+      <div v-if="dueCards.length">
+        <div class="mb-6">
+          <UCard>
+            <template #header>
+              <h3 class="text-xl font-bold">{{ currentCard.front }}</h3>
+            </template>
+            
+            <div class="text-center">
+              <UButton 
+                @click="toggleShowBack" 
+                class="mb-4"
+                :label="showBack ? 'Cacher la réponse' : 'Voir la réponse'"
+              />
+              
+              <p v-if="showBack" class="text-lg bg-gray-50 p-4 rounded">
+                {{ currentCard.back }}
+              </p>
+            </div>
+          </UCard>
+        </div>
+        
+        <div v-if="showBack">
+          <p class="block mb-3 font-semibold">Évaluez la difficulté de votre réponse :</p>
+          <div class="grid grid-cols-6 gap-2">
+            <UButton 
+              v-for="n in 6" 
+              :key="n - 1" 
+              @click="rate(n - 1)"
+              variant="outline"
+              size="sm"
+              :label="(n - 1).toString()"
+            />
+          </div>
+          <p class="text-sm text-gray-600 mt-2">
+            0 = Échec total • 5 = Parfait
+          </p>
         </div>
       </div>
+      
+      <div v-else class="text-center">
+        <UCard>
+          <p class="text-lg">🎉 Toutes les cartes sont à jour pour aujourd'hui !</p>
+        </UCard>
+      </div>
     </div>
-    <p v-else>Toutes les cartes sont à jour pour aujourd'hui.</p>
-  </div>
+  </UContainer>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { useSM2 } from '@/composables/useSM2'
 
-// Exemple de jeu de cartes
-const cards = ref([
+const initialCards = [
   {
     id: '1',
-    front: 'Bonjour',
-    back: 'Hello',
+    front: 'こんにちは',
+    back: 'Bonjour',
     easiness: 2.5,
     interval: 0,
     repetitions: 0,
     dueDate: new Date(),
   },
-  // Ajoutez vos cartes ici
-])
-
-const today = () => new Date()
-const dueCards = computed(() => cards.value.filter((c) => c.dueDate <= today()))
-const currentIndex = ref(0)
-const currentCard = computed(() => dueCards.value[currentIndex.value])
-const showBack = ref(false)
-
-function updateCard(card, quality) {
-  if (quality < 3) {
-    card.repetitions = 0
-    card.interval = 1
-  } else {
-    card.repetitions++
-    if (card.repetitions === 1) card.interval = 1
-    else if (card.repetitions === 2) card.interval = 6
-    else card.interval = Math.round(card.interval * card.easiness)
+  {
+    id: '2',
+    front: 'ありがとう',
+    back: 'Merci',
+    easiness: 2.5,
+    interval: 0,
+    repetitions: 0,
+    dueDate: new Date(),
   }
-  card.easiness += 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
-  card.easiness = Math.max(1.3, card.easiness)
-  card.dueDate = new Date(Date.now() + card.interval * 24 * 60 * 60 * 1000)
-}
+]
 
-function rate(q) {
-  updateCard(currentCard.value, q)
-  showBack.value = false
-  // Passage à la carte suivante ou reset
-  if (currentIndex.value + 1 < dueCards.value.length) currentIndex.value++
-  else currentIndex.value = 0
-}
+const {
+  dueCards,
+  currentCard,
+  showBack,
+  rate,
+  toggleShowBack
+} = useSM2(initialCards)
 </script>
