@@ -4,7 +4,7 @@ export function usePodcastFeed() {
   const episodes = ref([])
   const loading = ref(false)
   const error = ref(null)
-  const feedUrl = 'https://nihongoconteppei.com/feed/podcast/'
+  const feedFile = '/podcast.xml' // Fichier local dans le dossier public
 
   // Fonction pour parser le XML RSS
   const parseRSSFeed = (xmlText) => {
@@ -77,19 +77,17 @@ export function usePodcastFeed() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  // Fonction pour récupérer le flux RSS via proxy CORS
+  // Fonction pour récupérer le fichier XML local
   const fetchPodcastFeed = async () => {
     loading.value = true
     error.value = null
     
     try {
-      // Utiliser un proxy CORS pour éviter les problèmes CORS
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`
-      
-      const response = await fetch(proxyUrl)
+      // Charger le fichier podcast.xml depuis le dossier public
+      const response = await fetch(feedFile)
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`)
+        throw new Error(`Erreur HTTP: ${response.status} - Fichier ${feedFile} introuvable`)
       }
       
       const xmlText = await response.text()
@@ -97,10 +95,10 @@ export function usePodcastFeed() {
       
       episodes.value = parsedEpisodes
       
-      console.log(`✅ ${parsedEpisodes.length} épisodes chargés depuis le flux RSS`)
+      console.log(`✅ ${parsedEpisodes.length} épisodes chargés depuis ${feedFile}`)
       
     } catch (err) {
-      console.error('Erreur lors du chargement du flux RSS:', err)
+      console.error('Erreur lors du chargement du fichier XML:', err)
       error.value = err.message
       episodes.value = []
     } finally {
