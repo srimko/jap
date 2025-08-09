@@ -1,7 +1,7 @@
 <template>
   <UContainer>
     <div class="max-w-6xl mx-auto">
-      <!-- En-tête avec titre et statistiques -->
+      <!-- Header with title and statistics -->
       <div class="mb-8">
         <div class="text-center mb-6">
           <h1 class="text-4xl font-bold text-gray-900 mb-2">
@@ -12,12 +12,12 @@
           </p>
         </div>
 
-        <!-- Statistiques -->
+        <!-- Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <UCard>
             <div class="text-center">
               <p class="text-2xl font-bold text-blue-600">{{ statistics.basicCount }}</p>
-              <p class="text-sm text-gray-600">Hiragana de base</p>
+              <p class="text-sm text-gray-600">Hiragana avec audio</p>
             </div>
           </UCard>
           
@@ -46,10 +46,10 @@
         </div>
       </div>
 
-      <!-- Contrôles -->
+      <!-- Controls -->
       <div class="mb-8">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-gray-50 p-4 rounded-lg">
-          <!-- Onglets de vue -->
+          <!-- View tabs -->
           <div class="flex gap-2">
             <UButton
               @click="currentView = 'basic'"
@@ -72,7 +72,7 @@
             </UButton>
           </div>
 
-          <!-- Options d'affichage -->
+          <!-- Display options -->
           <div class="flex items-center gap-4">
             <UToggle
               v-model="showRomaji"
@@ -87,7 +87,7 @@
             <span class="text-sm text-gray-700">Jouer au survol</span>
           </div>
 
-          <!-- Actions audio -->
+          <!-- Audio actions -->
           <div class="flex gap-2">
             <UButton
               @click="playAll"
@@ -102,7 +102,7 @@
             </UButton>
             
             <UButton
-              @click="stopAudio"
+              @click="stopAllAudio"
               color="red"
               variant="outline"
               size="sm"
@@ -115,7 +115,7 @@
         </div>
       </div>
 
-      <!-- Message d'aide -->
+      <!-- Help message -->
       <div v-if="!browserSupportsAudio" class="mb-6">
         <UAlert
           color="orange"
@@ -126,7 +126,7 @@
         />
       </div>
 
-      <!-- Grille des hiragana -->
+      <!-- Hiragana grid -->
       <div class="hiragana-grid-container">
         <div 
           class="hiragana-grid"
@@ -135,9 +135,9 @@
             'combinations-grid': currentView === 'combinations'
           }"
         >
-          <!-- Génération de la grille -->
+          <!-- Grid generation -->
           <template v-for="(row, rowIndex) in currentGrid" :key="`row-${rowIndex}`">
-            <!-- Bouton de lecture de ligne -->
+            <!-- Row play button -->
             <div v-if="currentView === 'basic'" class="row-controls">
               <UButton
                 @click="playRow(rowIndex)"
@@ -151,10 +151,10 @@
               </UButton>
             </div>
 
-            <!-- Cases hiragana de la ligne -->
+            <!-- Hiragana cells in the row -->
             <HiraganaCard
               v-for="(hiragana, colIndex) in row"
-              :key="`${rowIndex}-${colIndex}`"
+              :key="`${rowIndex}-${colIndex}-${hiragana?.char || 'empty'}`"
               :hiragana="hiragana"
               :show-romaji="showRomaji"
               :enable-hover="playOnHover"
@@ -167,9 +167,9 @@
         </div>
       </div>
 
-      <!-- Informations complémentaires -->
+      <!-- Additional information -->
       <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Guide d'utilisation -->
+        <!-- Usage guide -->
         <UCard>
           <template #header>
             <h3 class="text-lg font-semibold flex items-center">
@@ -187,7 +187,7 @@
           </div>
         </UCard>
 
-        <!-- Informations sur les hiragana -->
+        <!-- Information about hiragana -->
         <UCard>
           <template #header>
             <h3 class="text-lg font-semibold flex items-center">
@@ -199,14 +199,14 @@
           <div class="space-y-3 text-sm">
             <p>Les <strong>hiragana</strong> (ひらがな) sont l'un des trois systèmes d'écriture japonais.</p>
             <p><strong>Utilisation</strong> : mots japonais natifs, particules grammaticales, conjugaisons</p>
-            <p><strong>{{ statistics.basicCount }} caractères de base</strong> organisés en lignes syllabiques</p>
+            <p><strong>{{ statistics.basicCount }} caractères avec audio</strong> disponibles pour l'apprentissage</p>
             <p><strong>{{ statistics.combinationsCount }} combinaisons</strong> avec や, ゆ, よ pour des sons complexes</p>
-            <p><strong>Apprentissage</strong> : base essentielle avant katakana et kanji</p>
+            <p><strong>Source audio</strong> : fichiers de prononciation authentique de <a href="https://www.thoughtco.com/how-to-pronounce-hiragana-japanese-hiragana-with-audio-files-4077351" target="_blank" class="text-blue-600 hover:underline">ThoughtCo.com</a></p>
           </div>
         </UCard>
       </div>
 
-      <!-- Actions rapides en bas -->
+      <!-- Quick actions at the bottom -->
       <div class="mt-8 text-center">
         <div class="flex flex-wrap justify-center gap-4">
           <UButton
@@ -246,7 +246,7 @@ import { ref, onMounted } from 'vue'
 import { useHiragana } from '@/composables/useHiragana'
 import HiraganaCard from '@/components/HiraganaCard.vue'
 
-// Composable hiragana
+// Hiragana composable
 const {
   showRomaji,
   playOnHover,
@@ -257,21 +257,22 @@ const {
   speakHiragana,
   playRow,
   playAll: playAllHiragana,
+  stopAudio,
   handleHover
 } = useHiragana()
 
-// État local
+// Local state
 const isPlayingAll = ref(false)
 const browserSupportsAudio = ref(true)
 
-// Vérification du support audio au montage
+// Check audio support on mount
 onMounted(() => {
   if (!('speechSynthesis' in window)) {
     browserSupportsAudio.value = false
   }
 })
 
-// Lecture de tous les hiragana avec indicateur
+// Play all hiragana with indicator
 const playAll = async () => {
   isPlayingAll.value = true
   try {
@@ -281,14 +282,12 @@ const playAll = async () => {
   }
 }
 
-// Arrêter l'audio
-const stopAudio = () => {
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel()
-  }
+// Stop audio (uses composable function)
+const stopAllAudio = () => {
+  stopAudio() // Fonction du composable
 }
 
-// Fonctionnalités futures (placeholders)
+// Future features (placeholders)
 const testRandomHiragana = () => {
   alert('🚧 Fonction de test aléatoire en développement')
 }
@@ -318,7 +317,7 @@ const exportProgress = () => {
 </script>
 
 <style scoped>
-/* Grille principale */
+/* Main grid */
 .hiragana-grid-container {
   @apply relative;
 }
@@ -338,7 +337,7 @@ const exportProgress = () => {
   gap: 1rem;
 }
 
-/* Contrôles de ligne */
+/* Row controls */
 .row-controls {
   @apply flex items-center justify-center;
 }
@@ -370,7 +369,7 @@ const exportProgress = () => {
   animation: fade-in 0.3s ease-out forwards;
 }
 
-/* Décalage de l'animation pour chaque cellule */
+/* Animation delay for each cell */
 .hiragana-cell:nth-child(1) { animation-delay: 0.05s; }
 .hiragana-cell:nth-child(2) { animation-delay: 0.1s; }
 .hiragana-cell:nth-child(3) { animation-delay: 0.15s; }

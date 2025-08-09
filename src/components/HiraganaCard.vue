@@ -10,12 +10,12 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <!-- Caractère hiragana principal -->
+    <!-- Main hiragana character -->
     <div class="hiragana-char">
       {{ hiragana.char }}
     </div>
     
-    <!-- Lecture romaji -->
+    <!-- Romaji reading -->
     <div 
       v-if="showRomaji" 
       class="romaji-reading"
@@ -24,7 +24,7 @@
       {{ hiragana.romaji }}
     </div>
     
-    <!-- Indicateur audio -->
+    <!-- Audio indicator -->
     <div class="audio-indicator" :class="{ 'active': isPlaying }">
       <UIcon 
         :name="isPlaying ? 'i-heroicons-speaker-wave' : 'i-heroicons-volume-up'" 
@@ -32,13 +32,13 @@
       />
     </div>
     
-    <!-- Overlay d'interaction -->
+    <!-- Interaction overlay -->
     <div class="interaction-overlay">
       <UIcon name="i-heroicons-play" class="play-icon" />
     </div>
   </div>
   
-  <!-- Case vide -->
+  <!-- Empty cell -->
   <div v-else class="hiragana-card empty"></div>
 </template>
 
@@ -66,19 +66,19 @@ const props = defineProps({
 
 const emit = defineEmits(['play', 'hover-enter', 'hover-leave'])
 
-// État de lecture
+// Playing state
 const isPlaying = computed(() => 
   props.currentPlaying === props.hiragana?.char
 )
 
-// Gestion du clic
+// Click handling
 const handleClick = () => {
   if (props.hiragana) {
     emit('play', props.hiragana)
   }
 }
 
-// Gestion du hover
+// Hover handling
 const handleMouseEnter = () => {
   if (props.hiragana && props.enableHover) {
     emit('hover-enter', props.hiragana)
@@ -144,7 +144,7 @@ const handleMouseLeave = () => {
   border-color: #86efac;
 }
 
-/* Caractère principal */
+/* Main character */
 .hiragana-char {
   font-size: 1.875rem;
   font-weight: 700;
@@ -158,7 +158,7 @@ const handleMouseLeave = () => {
   color: #1d4ed8;
 }
 
-/* Lecture romaji */
+/* Romaji reading */
 .romaji-reading {
   font-size: 0.75rem;
   color: #6b7280;
@@ -176,7 +176,7 @@ const handleMouseLeave = () => {
   color: #2563eb;
 }
 
-/* Indicateur audio */
+/* Audio indicator */
 .audio-indicator {
   position: absolute;
   top: 0.25rem;
@@ -204,7 +204,7 @@ const handleMouseLeave = () => {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Overlay d'interaction */
+/* Interaction overlay */
 .interaction-overlay {
   position: absolute;
   inset: 0;
@@ -235,7 +235,7 @@ const handleMouseLeave = () => {
   opacity: 0.8;
 }
 
-/* Animations spéciales */
+/* Special animations */
 @keyframes bounce-gentle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-0.125rem); }

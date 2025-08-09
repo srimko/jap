@@ -83,8 +83,8 @@
               </div>
             </template>
             <ul class="text-sm space-y-2 text-gray-600">
-              <li>• 46 hiragana de base + 33 combinaisons</li>
-              <li>• Synthèse vocale japonaise intégrée</li>
+              <li>• 45 hiragana avec fichiers audio authentiques</li>
+              <li>• Audio provenant de <a href="https://www.thoughtco.com/how-to-pronounce-hiragana-japanese-hiragana-with-audio-files-4077351" target="_blank" class="text-blue-600 hover:underline">ThoughtCo.com</a></li>
               <li>• Mode entraînement avec masquage</li>
               <li>• Lecture séquentielle et par lignes</li>
               <li>• Interface interactive responsive</li>

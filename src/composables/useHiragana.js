@@ -5,7 +5,7 @@ export function useHiragana() {
   const playOnHover = ref(false)
   const currentPlaying = ref(null)
 
-  // Données hiragana structurées par lignes (basées sur le fichier kanji.html)
+  // Structured hiragana data organized by rows (based on kanji.html file)
   const hiraganaGrid = ref([
     [
       { char: 'あ', romaji: 'a' },
@@ -93,9 +93,9 @@ export function useHiragana() {
     ],
     [
       { char: 'や', romaji: 'ya' },
-      null, // case vide
+      null, // empty cell
       { char: 'ゆ', romaji: 'yu' },
-      null, // case vide
+      null, // empty cell
       { char: 'よ', romaji: 'yo' }
     ],
     [
@@ -107,21 +107,21 @@ export function useHiragana() {
     ],
     [
       { char: 'わ', romaji: 'wa' },
-      null, // case vide
-      null, // case vide
-      null, // case vide
+      null, // empty cell
+      null, // empty cell
+      null, // empty cell
       { char: 'を', romaji: 'wo' }
     ],
     [
       { char: 'ん', romaji: 'n' },
-      null, // case vide
-      null, // case vide
-      null, // case vide
+      null, // empty cell
+      null, // empty cell
+      null, // empty cell
       null  // case vide
     ]
   ])
 
-  // Hiragana combinés (ya, yu, yo)
+  // Combined hiragana (ya, yu, yo)
   const combinationsGrid = ref([
     [
       { char: 'きゃ', romaji: 'kya' },
@@ -180,46 +180,144 @@ export function useHiragana() {
     ]
   ])
 
-  // Vue actuelle (basic ou combinations)
+  // Current view (basic or combinations)
   const currentView = ref('basic')
 
-  // Grille actuelle basée sur la vue
-  const currentGrid = computed(() => {
-    return currentView.value === 'basic' ? hiraganaGrid.value : combinationsGrid.value
+  // Function to check if a hiragana has an audio file
+  const hasAudioFile = (hiragana) => {
+    return hiragana && availableAudioFiles.includes(hiragana.romaji)
+  }
+
+  // Filtered grid to show only hiragana with audio (keeps row structure)
+  const filteredHiraganaGrid = computed(() => {
+    return hiraganaGrid.value.map(row => 
+      row.map(hiragana => hasAudioFile(hiragana) ? hiragana : null)
+    ).filter(row => row.some(hiragana => hiragana !== null))
   })
 
-  // Liste plate de tous les hiragana (pour recherche)
+  // Current grid based on the view
+  const currentGrid = computed(() => {
+    return currentView.value === 'basic' ? filteredHiraganaGrid.value : combinationsGrid.value
+  })
+
+  // Flat list of all hiragana (for search)
   const allHiragana = computed(() => {
     const basic = hiraganaGrid.value.flat().filter(Boolean)
     const combinations = combinationsGrid.value.flat().filter(Boolean)
     return [...basic, ...combinations]
   })
 
-  // Statistiques
+  // Statistics
   const statistics = computed(() => ({
-    basicCount: hiraganaGrid.value.flat().filter(Boolean).length,
+    basicCount: filteredHiraganaGrid.value.flat().filter(Boolean).length,
     combinationsCount: combinationsGrid.value.flat().filter(Boolean).length,
-    totalCount: allHiragana.value.length
+    totalCount: allHiragana.value.length,
+    audioAvailableCount: availableAudioFiles.length
   }))
 
-  // Synthèse vocale pour la prononciation
-  const speakHiragana = (hiragana) => {
+  // State for audio file management
+  const audioCache = ref(new Map())
+  const currentAudio = ref(null)
+
+  // List of available audio files (based on files in public/audio/hiragana/)
+  const availableAudioFiles = [
+    'a', 'chi', 'e', 'fu', 'ha', 'he', 'hi', 'ho', 'i', 'ka', 'ke', 'ki', 'ko', 'ku',
+    'ma', 'me', 'mi', 'mo', 'mu', 'n', 'na', 'ne', 'ni', 'no', 'nu', 'o', 'ra', 're',
+    'ri', 'ro', 'ru', 'sa', 'se', 'shi', 'so', 'su', 'ta', 'te', 'to', 'tsu', 'u',
+    'wa', 'ya', 'yo', 'yu'
+  ]
+
+  // Play local audio files
+  const speakHiragana = async (hiragana) => {
     if (!hiragana) return
 
+    try {
+      // Stop any current audio
+      if (currentAudio.value) {
+        currentAudio.value.pause()
+        currentAudio.value.currentTime = 0
+      }
+
+      // Indicate which hiragana is currently playing
+      currentPlaying.value = hiragana.char
+
+      // Build the audio file path
+      const audioPath = `/audio/hiragana/${hiragana.romaji}.mp3`
+      
+      // Check if audio is cached
+      let audio = audioCache.value.get(hiragana.romaji)
+      
+      if (!audio) {
+        // Create a new Audio object
+        audio = new Audio(audioPath)
+        audio.preload = 'auto'
+        
+        // Cache the audio
+        audioCache.value.set(hiragana.romaji, audio)
+      }
+
+      // Clean old event listeners to avoid duplicates
+      audio.onended = null
+      audio.onerror = null
+      audio.oncanplaythrough = null
+
+      // Configure events for this playback
+      audio.onended = () => {
+        currentPlaying.value = null
+        currentAudio.value = null
+      }
+
+      audio.onerror = () => {
+        console.warn(`❌ Impossible de charger le fichier audio: ${audioPath}`)
+        currentPlaying.value = null
+        currentAudio.value = null
+        // Fallback to speech synthesis if available
+        fallbackToSpeechSynthesis(hiragana)
+      }
+
+      // Set current audio before playing
+      currentAudio.value = audio
+
+      // Try to play the audio file
+      try {
+        await audio.play()
+        console.log(`🔊 Lecture audio MP3: ${hiragana.char} → ${hiragana.romaji}`)
+      } catch (playError) {
+        console.warn(`❌ Erreur lors de la lecture MP3: ${playError.message}`)
+        currentPlaying.value = null
+        currentAudio.value = null
+        fallbackToSpeechSynthesis(hiragana)
+      }
+
+    } catch (error) {
+      console.error('❌ Erreur lors de la lecture audio:', error)
+      currentPlaying.value = null
+      currentAudio.value = null
+      fallbackToSpeechSynthesis(hiragana)
+    }
+  }
+
+  // Fallback to browser speech synthesis
+  const fallbackToSpeechSynthesis = (hiragana) => {
+    // Don't use fallback if audio is already playing
+    if (currentAudio.value) {
+      return
+    }
+
     if ('speechSynthesis' in window) {
-      // Annuler toute synthèse en cours
+      // Cancel any ongoing synthesis
       speechSynthesis.cancel()
       
-      // Indiquer quel hiragana est en cours de lecture
+      // Mark that we're using speech synthesis
       currentPlaying.value = hiragana.char
       
       const utterance = new SpeechSynthesisUtterance(hiragana.romaji)
       utterance.lang = 'ja-JP'
-      utterance.rate = 0.6 // Plus lent pour la prononciation claire
+      utterance.rate = 0.6
       utterance.pitch = 1.0
       utterance.volume = 0.9
       
-      // Essayer de trouver une voix japonaise
+      // Try to find a Japanese voice
       const voices = speechSynthesis.getVoices()
       const japaneseVoice = voices.find(voice => 
         voice.lang.startsWith('ja') || 
@@ -231,26 +329,35 @@ export function useHiragana() {
         utterance.voice = japaneseVoice
       }
 
-      // Événements de fin de lecture
       utterance.onend = () => {
         currentPlaying.value = null
       }
 
       utterance.onerror = () => {
         currentPlaying.value = null
-        console.warn('❌ Erreur lors de la synthèse vocale')
       }
       
       speechSynthesis.speak(utterance)
-      
-      console.log(`🔊 Prononciation: ${hiragana.char} → ${hiragana.romaji}`)
+      console.log(`🔊 Fallback synthèse vocale: ${hiragana.char} → ${hiragana.romaji}`)
     } else {
-      console.warn('❌ Synthèse vocale non supportée par ce navigateur')
-      alert('La synthèse vocale n\'est pas supportée par votre navigateur.')
+      console.warn('❌ Aucun système audio disponible')
+      currentPlaying.value = null
     }
   }
 
-  // Jouer tous les hiragana d'une ligne
+  // Stop current audio playback
+  const stopAudio = () => {
+    if (currentAudio.value) {
+      currentAudio.value.pause()
+      currentAudio.value.currentTime = 0
+    }
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel()
+    }
+    currentPlaying.value = null
+  }
+
+  // Play all hiragana in a row
   const playRow = async (rowIndex) => {
     const row = currentGrid.value[rowIndex]
     if (!row) return
@@ -258,8 +365,8 @@ export function useHiragana() {
     for (let i = 0; i < row.length; i++) {
       const hiragana = row[i]
       if (hiragana) {
-        speakHiragana(hiragana)
-        // Attendre la fin de la prononciation avant le suivant
+        await speakHiragana(hiragana)
+        // Wait for pronunciation to end before next one
         await new Promise(resolve => {
           const checkEnd = () => {
             if (currentPlaying.value === null) {
@@ -268,39 +375,39 @@ export function useHiragana() {
               setTimeout(checkEnd, 100)
             }
           }
-          setTimeout(checkEnd, 800) // Délai minimum entre chaque
+          setTimeout(checkEnd, 1000) // Minimum delay between each
         })
       }
     }
   }
 
-  // Jouer tous les hiragana de la grille
+  // Play all hiragana in the grid
   const playAll = async () => {
     for (let i = 0; i < currentGrid.value.length; i++) {
       await playRow(i)
-      // Petite pause entre les lignes
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Short pause between rows
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
   }
 
-  // Fonction pour gérer le hover audio
+  // Function to handle hover audio
   const handleHover = (hiragana) => {
     if (playOnHover.value && hiragana) {
-      // Petit délai pour éviter les lectures accidentelles
+      // Short delay to avoid accidental playback
       setTimeout(() => {
-        if (playOnHover.value) { // Double vérification
+        if (playOnHover.value) { // Double check
           speakHiragana(hiragana)
         }
       }, 200)
     }
   }
 
-  // Chercher un hiragana spécifique
+  // Find a specific hiragana
   const findHiragana = (char) => {
     return allHiragana.value.find(h => h.char === char)
   }
 
-  // Obtenir une liste de hiragana aléatoires pour le quiz
+  // Get a random list of hiragana for quiz
   const getRandomHiragana = (count = 10) => {
     const shuffled = [...allHiragana.value].sort(() => 0.5 - Math.random())
     return shuffled.slice(0, count)
@@ -326,6 +433,7 @@ export function useHiragana() {
     speakHiragana,
     playRow,
     playAll,
+    stopAudio,
     handleHover,
     findHiragana,
     getRandomHiragana
